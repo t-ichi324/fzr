@@ -1,0 +1,15 @@
+/vendor/
+/app/
+/storage/
+*.log
+.env
+env.ini
+.DS_Store
+Thumbs.db
+.claude/
+.ai-work/
+.DS_Store
+*.swp
+
+SKILL.md
+ROADMAP.md

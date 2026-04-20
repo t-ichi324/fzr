@@ -1,0 +1,43 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Fzr CLI Entrypoint
+ *
+ * Usage:
+ *   php fzr <command> [options]
+ *
+ * Commands:
+ *   init         Initialize a new Fzr project (interactive)
+ *   make:model   Generate Entity/Model classes from database
+ *   build        Package framework into fzr.phar
+ */
+
+require_once __DIR__ . '/loader.php';
+
+$argv    = $_SERVER['argv'];
+$command = $argv[1] ?? 'help';
+
+$map = [
+    'init'       => \Fzr\Command\InitCommand::class,
+    'make:model' => \Fzr\Command\GenCommand::class,
+    'build'      => \Fzr\Command\PharCommand::class,
+];
+
+if ($command === 'help' || $command === '--help' || $command === '-h') {
+    echo "\033[1mUsage:\033[0m php fzr <command> [options]\n\n";
+    echo "\033[33mAvailable commands:\033[0m\n";
+    echo "  init         Initialize a new Fzr project (interactive)\n";
+    echo "  make:model   Generate Entity/Model classes from database\n";
+    echo "  build        Package framework into fzr.phar\n";
+    exit(0);
+}
+
+if (!isset($map[$command])) {
+    echo "\033[31m[ERROR]\033[0m Unknown command: {$command}\n";
+    echo "Run 'php fzr help' for available commands.\n";
+    exit(1);
+}
+
+$class    = $map[$command];
+$instance = new $class(array_slice($argv, 2));
+exit($instance->execute());
