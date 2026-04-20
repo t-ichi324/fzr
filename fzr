@@ -24,6 +24,8 @@ $map = [
 ];
 
 if ($command === 'help' || $command === '--help' || $command === '-h') {
+    $version = \Fzr\Config::VERSION;
+    echo "\033[1;36mFzr Framework\033[0m v{$version}\n\n";
     echo "\033[1mUsage:\033[0m php fzr <command> [options]\n\n";
     echo "\033[33mAvailable commands:\033[0m\n";
     echo "  init         Initialize a new Fzr project (interactive)\n";

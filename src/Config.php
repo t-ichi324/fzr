@@ -7,6 +7,7 @@ namespace Fzr;
  */
 class Config
 {
+    const VERSION = '1.0.0';
     const DEFAULT_INI = "env.ini";
     const DEFAULT_ROUTE = "index";
     const DEFAULT_VIEW = "index";
