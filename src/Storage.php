@@ -3,8 +3,15 @@
 namespace Fzr;
 
 /**
- * ストレージアダプターのインターフェース
- * (Local, GCS等で実装を切り替えるための規約)
+ * Storage Adapter Contract — defines the interface for pluggable filesystem drivers.
+ *
+ * Implement this interface to add support for a new storage backend (e.g., S3, FTP).
+ * Typical uses: swapping Local for GCS in cloud deployments, adding test fakes.
+ *
+ * - All path arguments are relative to the disk's configured root.
+ * - Implementations must be registered via {@see Storage::setDisk()} or auto-created from config.
+ *
+ * Contrast with {@see Storage} (the static facade that delegates to this interface).
  */
 interface StorageAdapter
 {
@@ -15,7 +22,7 @@ interface StorageAdapter
     public function size(string $path): int;
     public function lastModified(string $path): int;
     public function url(string $path): string;
-    /** ファイル一覧を取得 */
+    /** @return list<string> */
     public function files(string $directory = '', bool $recursive = false): array;
 }
 
@@ -167,7 +174,7 @@ class Storage
         return self::disk()->url($path);
     }
 
-    /** ファイル一覧を取得 */
+    /** @return list<string> */
     public static function files(string $directory = '', bool $recursive = false): array
     {
         return self::disk()->files($directory, $recursive);
@@ -239,6 +246,7 @@ class LocalStorageAdapter implements StorageAdapter
         return url($this->baseUrl . '/' . ltrim($path, '/'));
     }
 
+    /** @return list<string> */
     public function files(string $directory = '', bool $recursive = false): array
     {
         $fullPath = $this->full($directory);
@@ -276,6 +284,7 @@ class LocalStorageAdapter implements StorageAdapter
  */
 class GcsStorageAdapter implements StorageAdapter
 {
+    /** @var \Google\Cloud\Storage\Bucket */
     private $bucket;
     private string $baseUrl;
     private string $root;
@@ -345,6 +354,7 @@ class GcsStorageAdapter implements StorageAdapter
         return $this->baseUrl ? $this->baseUrl . '/' . $fullPath : "https://storage.googleapis.com/{$this->bucket->name()}/" . $fullPath;
     }
 
+    /** @return list<string> */
     public function files(string $directory = '', bool $recursive = false): array
     {
         $fullDir = $this->fullPath($directory);

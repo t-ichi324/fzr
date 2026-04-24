@@ -127,6 +127,7 @@ abstract class Entity extends \Fzr\Model
         $data = array_merge($attributes, $values);
         $id   = static::query()->insert($data);
 
+        /** @var static */
         return static::find($id) ?? static::query()
             ->where(static::primaryKeyName(), $id)
             ->first();
