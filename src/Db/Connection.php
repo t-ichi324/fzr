@@ -23,9 +23,14 @@ class Connection
     protected ?string $timezone = null;
     protected ?string $schema = null;
     protected ?string $sqlitePath = null;
+    protected ?string $socket = null;
     protected ?\PDO $pdo = null;
+    private ?float $lastUsed = null;
 
     protected int $transactions = 0;
+
+    /** FPMワーカーがPDOを使い回す間に接続が切れていた場合の再接続猶予秒数 */
+    private const STALE_THRESHOLD = 60.0;
 
     public function __construct(string $key, array $config = [])
     {
@@ -35,11 +40,21 @@ class Connection
         }
     }
 
-    /** 接続取得 / 初期化 */
+    /** 接続取得 / 初期化（FPMワーカー内での stale 接続を自動再接続） */
     public function getPdo(): \PDO
     {
-        if ($this->pdo !== null) return $this->pdo;
-        $this->pdo = $this->createPdo();
+        $now = microtime(true);
+        if ($this->pdo !== null && $this->lastUsed !== null && ($now - $this->lastUsed) > self::STALE_THRESHOLD) {
+            try {
+                $this->pdo->query('SELECT 1');
+            } catch (\PDOException) {
+                $this->pdo = null;
+            }
+        }
+        if ($this->pdo === null) {
+            $this->pdo = $this->createPdo();
+        }
+        $this->lastUsed = $now;
         return $this->pdo;
     }
 
@@ -66,16 +81,21 @@ class Connection
                 return $pdo;
             }
 
-            // MySQL / PostgreSQL 共通DSN構築
-            $dsn = "{$driver}:host={$this->host}";
-            if ($this->port) {
-                $dsn .= ";port={$this->port}";
-            }
-            $dsn .= ";dbname={$this->database}";
-
-            // charset: MySQL=DSNに含む、PostgreSQL=接続後 SET client_encoding
-            if ($driver === 'mysql' && $this->charset) {
-                $dsn .= ";charset={$this->charset}";
+            // MySQL / PostgreSQL DSN構築
+            // Cloud SQL Proxy の Unix ソケット接続を優先（TCP より低レイテンシ・接続数節約）
+            if ($driver === 'mysql') {
+                if ($this->socket) {
+                    $dsn = "mysql:unix_socket={$this->socket};dbname={$this->database}";
+                } else {
+                    $dsn = "mysql:host={$this->host}";
+                    if ($this->port) $dsn .= ";port={$this->port}";
+                    $dsn .= ";dbname={$this->database}";
+                }
+                if ($this->charset) $dsn .= ";charset={$this->charset}";
+            } else {
+                $dsn = "{$driver}:host={$this->host}";
+                if ($this->port) $dsn .= ";port={$this->port}";
+                $dsn .= ";dbname={$this->database}";
             }
 
             $options = [
@@ -190,6 +210,7 @@ class Connection
             'timezone'   => Env::get("{$prefix}.timezone"),
             'schema'     => Env::get("{$prefix}.schema"),
             'sqlitePath' => Env::get("{$prefix}.sqlite_path"),
+            'socket'     => Env::get("{$prefix}.socket") ?: getenv('DB_SOCKET') ?: null,
         ]);
     }
 

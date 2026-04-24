@@ -3,7 +3,16 @@
 namespace Fzr;
 
 /**
- * 構造化モデル基底（インスタンス / プロパティベース）
+ * Structured model base — instance-based, typed properties.
+ *
+ * Use when the data shape is known at compile time and you want IDE autocompletion.
+ * Typical uses: form DTOs, API request/response objects, typed value objects.
+ *
+ * - Properties are declared explicitly on the subclass.
+ * - Data is accessed as `$model->property`.
+ * - Not persisted to DB; for DB-mapped objects use {@see \Fzr\Db\Entity}.
+ *
+ * Contrast with {@see Bag} (dynamic array-based) and {@see Store} (static/singleton-like).
  */
 abstract class Model implements \JsonSerializable
 {

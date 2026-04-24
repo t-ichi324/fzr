@@ -18,6 +18,10 @@ class Engine
     private static array $routes = [];
     private static ?self $instance = null;
 
+    /** ReflectionClass / ReflectionMethod キャッシュ（FPMワーカー内で使い回す） */
+    private static array $refClassCache = [];
+    private static array $refMethodCache = [];
+
     public static function getInstance(): ?self
     {
         return self::$instance;
@@ -290,7 +294,7 @@ class Engine
                         }
                         if (!$this->verifyAccess($controller, $routeAction, $dispatchMethod)) return;
                         if (!$this->invokeBeforeAction($class, $routeAction, $dispatchMethod)) return;
-                        $ret = $this->inv_inner($controller, $routeAction, $dispatchMethod, $params);
+                        $ret = $this->invokeInner($controller, $routeAction, $dispatchMethod, $params);
                         if (is_array($ret)) Response::handle($ret);
                         elseif (is_string($ret)) Response::handle(Response::view($ret));
                     } catch (HttpException $ex) {
@@ -309,7 +313,7 @@ class Engine
                 try {
                     if (!$this->verifyAccess($controller, $routeAction, $dispatchMethod)) return;
                     if (!$this->invokeBeforeAction($class, $routeAction, $dispatchMethod)) return;
-                    $ret = $this->inv_inner($controller, $routeAction, $dispatchMethod, $params);
+                    $ret = $this->invokeInner($controller, $routeAction, $dispatchMethod, $params);
                     if (is_array($ret)) Response::handle($ret);
                     elseif (is_string($ret)) Response::handle(Response::view($ret));
                     return;
@@ -434,7 +438,7 @@ class Engine
         }
     }
 
-    protected function inv_inner(Controller $controller, string $routeAction, string $dispatchMethod, array $params = [])
+    protected function invokeInner(Controller $controller, string $routeAction, string $dispatchMethod, array $params = [])
     {
         $class = get_class($controller);
         try {
@@ -442,7 +446,7 @@ class Engine
             if ($this->isMethodOverridden($controller, '__before')) {
                 if (($ret_bef = $controller->__before($routeAction, $dispatchMethod)) !== null) return $ret_bef;
             }
-            $refMethod = new ReflectionMethod($controller, $dispatchMethod);
+            $refMethod = $this->refMethod($controller, $dispatchMethod);
             $methodParams = $refMethod->getParameters();
             $args = [];
             foreach ($methodParams as $i => $param) {
@@ -467,9 +471,21 @@ class Engine
         return $ret;
     }
 
+    private function refClass(object $obj): ReflectionClass
+    {
+        $class = get_class($obj);
+        return self::$refClassCache[$class] ??= new ReflectionClass($obj);
+    }
+
+    private function refMethod(object $obj, string $method): ReflectionMethod
+    {
+        $key = get_class($obj) . '::' . $method;
+        return self::$refMethodCache[$key] ??= new ReflectionMethod($obj, $method);
+    }
+
     protected function isMethodOverridden($controller, $method): bool
     {
-        $refClass = new ReflectionClass($controller);
+        $refClass = $this->refClass($controller);
         return $refClass->hasMethod($method) && $refClass->getMethod($method)->getDeclaringClass()->getName() !== Controller::class;
     }
 
@@ -477,12 +493,12 @@ class Engine
     {
         if (strpos($routeAction, '_') === 0 || strpos($routeAction, '__') === 0) return false;
         if (!empty($deny = $controller->__getProp("denyMethods")) && (in_array($routeAction, $deny, true) || in_array($dispatchMethod, $deny, true))) return false;
-        return method_exists($controller, $dispatchMethod) && (new ReflectionMethod($controller, $dispatchMethod))->isPublic();
+        return method_exists($controller, $dispatchMethod) && $this->refMethod($controller, $dispatchMethod)->isPublic();
     }
 
     protected function verifyAccess($controller, string $action, string $dispatchMethod): bool
     {
-        $refClass  = new ReflectionClass($controller);
+        $refClass  = $this->refClass($controller);
         $refAction = $refClass->hasMethod($action) ? $refClass->getMethod($action) : null;
         $refDispatch = ($dispatchMethod !== $action && $refClass->hasMethod($dispatchMethod)) ? $refClass->getMethod($dispatchMethod) : null;
 
@@ -625,7 +641,7 @@ class Engine
         try {
             if (!$this->verifyAccess($controller, $methodName, $methodName)) return;
             if (!$this->invokeBeforeAction($className, $methodName, $methodName)) return;
-            $ret = $this->inv_inner($controller, $methodName, $methodName, $params);
+            $ret = $this->invokeInner($controller, $methodName, $methodName, $params);
             if (is_array($ret)) Response::handle($ret);
             elseif (is_string($ret)) Response::handle(Response::view($ret));
         } catch (HttpException $ex) {

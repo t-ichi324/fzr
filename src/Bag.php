@@ -3,7 +3,16 @@
 namespace Fzr;
 
 /**
- * 非構造化モデル基底（インスタンス / 配列ベース）
+ * Unstructured model base — instance-based, internal array storage.
+ *
+ * Use when the data shape is dynamic or unknown at compile time.
+ * Typical uses: arbitrary key-value containers, parsed payloads, flexible DTOs.
+ *
+ * - Data is stored in `$this->data` array; no declared properties needed.
+ * - Data is accessed via `$bag->get('key')`.
+ * - Instantiated per-object; each instance holds its own data.
+ *
+ * Contrast with {@see Model} (typed properties) and {@see Store} (static/singleton-like).
  */
 abstract class Bag implements \JsonSerializable
 {

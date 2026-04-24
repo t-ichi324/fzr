@@ -18,7 +18,6 @@ class Context
     public static function init(bool $is_debug): void
     {
         self::$debug = $is_debug;
-        if (self::$startTime > 0) return;
         self::$startTime = defined('APP_START_TIME') ? APP_START_TIME : microtime(true);
         self::$requestId = substr(bin2hex(random_bytes(4)), 0, 8);
     }

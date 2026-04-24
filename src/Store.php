@@ -3,7 +3,17 @@
 namespace Fzr;
 
 /**
- * 静的モデル基底（スタティック / レジストリベース）
+ * Static model base — class-level singleton registry, no instantiation.
+ *
+ * Use when you need shared, request-scoped state accessible globally without
+ * passing an object around.
+ * Typical uses: Auth user data, Session, Config, request-level caches.
+ *
+ * - Data is stored in a static registry keyed by subclass name.
+ * - Data is accessed via `ClassName::get('key')` / `ClassName::all()`.
+ * - One state per class per process; cleared with `ClassName::clear()`.
+ *
+ * Contrast with {@see Model} (typed properties) and {@see Bag} (instance array).
  */
 abstract class Store
 {
