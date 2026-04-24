@@ -2,7 +2,14 @@
 namespace Fzr;
 
 /**
- * URL生成
+ * URL Generator — creates application-internal URLs with base path handling.
+ *
+ * Use to generate links to other pages or assets within the application.
+ * Typical uses: generating href attributes, building redirect targets, asset URL resolution.
+ *
+ * - Automatically prepends the `APP_BASE` path for portable installations.
+ * - Supports relative and absolute URL generation.
+ * - Simple static interface: `Url::to('/path')`, `Url::base()`.
  */
 class Url {
     private static ?string $root = null;

@@ -4,7 +4,14 @@ namespace Fzr\Db;
 use Fzr\Collection;
 
 /**
- * DB操作結果セット（Collection を継承し、ページング情報も保持）
+ * Database Query Result — encapsulates paginated search results and metadata.
+ *
+ * Use to handle the output of `Query::page()` or `Db::page()`.
+ * Typical uses: displaying list views with pagination controls, JSON-returning API results.
+ *
+ * - Holds the current page data (rows) and total record count.
+ * - Calculates total pages, next/previous page numbers, and item offsets.
+ * - Generates HTML pagination links compatible with modern CSS frameworks.
  *
  * @template T of object
  * @extends Collection<int, T>

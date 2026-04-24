@@ -1,6 +1,12 @@
 <?php
 /**
- * フィールド Attributes（モデル/バリデーション用）
+ * Field Attributes — declarative markers for data mapping and validation.
+ *
+ * Use to annotate {@see Entity} or {@see Model} properties with metadata.
+ *
+ * - #[Label]: Provides a human-readable name for form rendering and error messages.
+ * - Validation Attributes: #[Required], #[Email], #[Numeric], #[MaxLength], etc.
+ * - Automatically extracted by {@see Form} and {@see Entity} to enforce rules or map schema.
  */
 
 namespace Fzr\Attr\Field;

@@ -3,7 +3,15 @@
 namespace Fzr\Db;
 
 /**
- * エンティティ基底（ActiveRecord 風）
+ * Active Record Entity — maps database tables to typed PHP objects.
+ *
+ * Use to represent a single row in a database table with property-based access.
+ * Typical uses: persistent data models, business logic encapsulation, CRUD operations.
+ *
+ * - Extends {@see \Fzr\Model} to provide typed properties with DB persistence logic.
+ * - Supports automatic model generation from database schema via `generateModels()`.
+ * - Provides simple CRUD methods (`save()`, `delete()`, `find()`).
+ * - Uses PHP 8 Attributes (#[Table], #[Id], #[Column]) for schema mapping.
  *
  * @template T of static
  */

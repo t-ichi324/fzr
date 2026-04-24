@@ -3,7 +3,15 @@
 namespace Fzr;
 
 /**
- * セッション管理
+ * Session Management — handles request-scoped persistent data.
+ *
+ * Use to store data that needs to survive across multiple requests (e.g., flash messages, user preferences).
+ * Typical uses: storing authentication keys, temporary state after redirects, user UI settings.
+ *
+ * - Automatically detects and switches between session drivers (File, Redis, or Encrypted Cookie).
+ * - Cookie driver uses AES-256-GCM encryption for security in stateless environments.
+ * - Provides "flash" messaging support (data that exists for only one subsequent request).
+ * - Implements {@see Store} to provide a unified data-access interface.
  */
 class Session extends Store
 {

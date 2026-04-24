@@ -3,7 +3,15 @@
 namespace Fzr;
 
 /**
- * トレーサー（実行履歴スタック・可視化）
+ * Performance Tracer — monitors and visualizes request execution data.
+ *
+ * Use to identify performance bottlenecks and inspect DB queries during development.
+ * Typical uses: measuring execution time, counting query counts, inspecting parameter bindings.
+ *
+ * - Collects performance metrics (memory, time) throughout the request lifecycle.
+ * - Renders a debug panel at the bottom of the page in debug mode (via `Response`).
+ * - Provides specialized methods for recording DB queries and cache operations.
+ * - Captures a stack of events that can be retrieved via `getAll()`.
  */
 class Tracer
 {

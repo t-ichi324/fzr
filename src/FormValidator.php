@@ -2,7 +2,14 @@
 namespace Fzr;
 
 /**
- * フォームバリデーションロジック
+ * Form Validator — enforces data integrity and business rules on input.
+ *
+ * Use to validate arrays of data (typically from HTTP requests).
+ * Typical uses: checking required fields, validating email formats, enforcing size limits.
+ *
+ * - Provides a wide range of built-in validation rules (required, email, numeric, etc.).
+ * - Supports custom error messages and localized labels.
+ * - Returns a structured list of validation errors for use in UI rendering.
  */
 class FormValidator
 {

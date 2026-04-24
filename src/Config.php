@@ -3,7 +3,13 @@
 namespace Fzr;
 
 /**
- * システム定数
+ * Framework Constants — central repository for framework-wide default settings.
+ *
+ * Defines default directory paths, class suffixes, and file names used by the {@see Engine}.
+ *
+ * - Centralizes internal naming conventions (e.g., `Controller` suffix).
+ * - Defines the default structure of the `app/` directory.
+ * - Used as the fallback when specific `app.ini` settings are missing.
  */
 class Config
 {

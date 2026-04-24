@@ -20,7 +20,14 @@ if (!defined('FZR_BUNDLED')) {
 }
 
 /**
- * オートローダー
+ * Class Autoloader — handles dynamic loading of framework and application classes.
+ *
+ * Use to register and manage class loading paths.
+ * Typical uses: bootstrapping the application, mapping namespaces to directories.
+ *
+ * - Implements a PSR-like autoloading strategy.
+ * - Supports class aliasing for cleaner code (e.g., `Request::get()` instead of `\Fzr\Request::get()`).
+ * - Optimizes performance by pre-loading core classes to avoid autoloading overhead.
  */
 class Loader
 {

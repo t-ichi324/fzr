@@ -3,23 +3,14 @@
 namespace Fzr;
 
 /**
- * CLI コマンド基底クラス
+ * CLI Command Base — handles command-line arguments and user interaction.
  *
- * app/commands/ 以下のコマンドファイルで任意に extends して使う。
- * extends せず普通のスクリプトとして書いてもよい。
+ * Use as the parent class for custom CLI tools located in `app/commands/`.
+ * Typical uses: database migrations, cleanup tasks, background workers, code generation.
  *
- * 使用例:
- *   class MakeModelCommand extends Command {
- *       public function handle(): int {
- *           $force  = $this->hasFlag('-f');
- *           $result = \Fzr\Db\Db::generateModels(ABSPATH . '/app/models', $force);
- *           foreach ($result['generated'] as $item) {
- *               $this->success("[GEN] {$item['table']} -> {$item['class']}");
- *           }
- *           return 0;
- *       }
- *   }
- *   exit((new MakeModelCommand(array_slice($argv, 2)))->handle());
+ * - Provides colored terminal output helpers (info, success, error).
+ * - Simplifies argument parsing (positional args, flags like `-f`, options like `--key=val`).
+ * - Used by the `php tool` entry point to execute application-specific tasks.
  */
 abstract class Command
 {

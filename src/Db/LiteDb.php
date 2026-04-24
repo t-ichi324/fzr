@@ -3,15 +3,15 @@
 namespace Fzr\Db;
 
 /**
- * SQLite 専用の静的ファサード
- * * 基本は app.ini の設定 (db.driver=sqlite, db.sqlite_path=...) に従って動作します。
- * スクリプト等で明示的にファイルを指定したい場合は LiteDb::open() を使用します。
- * * 使用例:
- * // app.ini の設定で接続
- * $users = LiteDb::table('users')->all();
- * * // 明示的にファイルを開く場合
- * LiteDb::open(__DIR__ . '/local.db');
- * $users = LiteDb::table('users')->all();
+ * Lightweight Database Helper — simplified SQLite facade for quick queries.
+ *
+ * Use for simple scripts or when the full Query Builder/Entity system is overkill.
+ * Typical uses: one-off data cleanup scripts, simple CRUD in small tools, local testing.
+ *
+ * - Specifically optimized for SQLite; handles file-based connection automatically.
+ * - Provides a minimal, static-like interface for PDO operations.
+ * - Can explicitly open specific database files via `LiteDb::open()`.
+ * - Includes SQLite-specific helpers like `hasTable()` and `hasColumn()`.
  */
 class LiteDb
 {

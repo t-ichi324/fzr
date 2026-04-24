@@ -1,19 +1,31 @@
 <?php
+
 namespace Fzr;
 
 /**
- * セキュリティ
+ * Security Utilities — core protection mechanisms and secure token generation.
+ *
+ * Use to enforce security policies like CSRF protection and IP-based access control.
+ * Typical uses: generating secure tokens, verifying CSRF on POST requests, matching IP CIDRs.
+ *
+ * - Manages CSRF tokens via session storage with support for hidden field generation.
+ * - Provides IPv4 CIDR matching for IP whitelisting (used by `#[IpWhitelist]`).
+ * - Generates cryptographically secure random tokens for various purposes.
+ * - Integrates with `Request` and `Session` for context-aware security checks.
  */
-class Security {
+class Security
+{
     /** CSRFトークン生成 */
-    public static function generateCsrfToken(): string {
+    public static function generateCsrfToken(): string
+    {
         $token = bin2hex(random_bytes(32));
         Session::set(defined('CSRF_TOKEN_NAME') ? CSRF_TOKEN_NAME : 'csrf_token', $token);
         return $token;
     }
 
     /** CSRFトークン取得（なければ生成） */
-    public static function getCsrfToken(): string {
+    public static function getCsrfToken(): string
+    {
         $key = defined('CSRF_TOKEN_NAME') ? CSRF_TOKEN_NAME : 'csrf_token';
         if (!Session::has($key)) {
             return self::generateCsrfToken();
@@ -21,7 +33,8 @@ class Security {
         return Session::get($key);
     }
 
-    public static function verifyCsrf(): void {
+    public static function verifyCsrf(): void
+    {
         $key = defined('CSRF_TOKEN_NAME') ? CSRF_TOKEN_NAME : 'csrf_token';
         $token = Request::input($key)
             ?: Request::server('HTTP_X_CSRF_TOKEN');
@@ -38,13 +51,15 @@ class Security {
     }
 
     /** CSRFトークンHTML hidden input */
-    public static function csrfField(): string {
+    public static function csrfField(): string
+    {
         $key = defined('CSRF_TOKEN_NAME') ? CSRF_TOKEN_NAME : 'csrf_token';
         return '<input type="hidden" name="' . h($key) . '" value="' . h(self::getCsrfToken()) . '">';
     }
 
     /** IP制限チェック */
-    public static function checkIP(string|array $ips = null): void {
+    public static function checkIP(null|string|array $ips = null): void
+    {
         // 引数がなければ Env から取得
         if (empty($ips)) {
             $ips = Env::get('ip.whitelist', '');
@@ -67,7 +82,8 @@ class Security {
     }
 
     /** IPソースの解決 (再帰的) */
-    private static function resolveIpList(string|array $source): array {
+    private static function resolveIpList(string|array $source): array
+    {
         if (is_array($source)) {
             $all = [];
             foreach ($source as $item) {
@@ -102,7 +118,8 @@ class Security {
     }
 
     /** IP/CIDR マッチング */
-    private static function ipMatch(string $ip, string $range): bool {
+    private static function ipMatch(string $ip, string $range): bool
+    {
         if (strpos($range, '/') === false) {
             return $ip === $range;
         }
@@ -118,17 +135,20 @@ class Security {
     }
 
     /** パスワードハッシュ */
-    public static function hashPassword(string $password): string {
+    public static function hashPassword(string $password): string
+    {
         return password_hash($password, PASSWORD_BCRYPT);
     }
 
     /** パスワード検証 */
-    public static function verifyPassword(string $password, string $hash): bool {
+    public static function verifyPassword(string $password, string $hash): bool
+    {
         return password_verify($password, $hash);
     }
 
     /** ランダムトークン生成 */
-    public static function randomToken(int $length = 32): string {
+    public static function randomToken(int $length = 32): string
+    {
         return bin2hex(random_bytes($length));
     }
 }

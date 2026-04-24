@@ -3,7 +3,14 @@
 namespace Fzr;
 
 /**
- * 物理パス管理
+ * Path Resolver — resolves absolute filesystem paths for various application directories.
+ *
+ * Use to access files on the server (logs, storage, views, etc.).
+ * Typical uses: reading view files, writing logs, saving uploaded files to storage.
+ *
+ * - Based on the `APP_ROOT` constant.
+ * - Provides helper methods for common subdirectories (`storage`, `log`, `view`, `temp`).
+ * - Ensures consistent directory separators across different OS environments.
  */
 class Path
 {

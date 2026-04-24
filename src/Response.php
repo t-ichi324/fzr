@@ -3,8 +3,15 @@
 namespace Fzr;
 
 /**
- * レスポンス処理
- * exit を setExitOnSend(false) で無効化可能（Cloud Run対応）
+ * HTTP Response Manager — handles status codes, headers, and content delivery.
+ *
+ * Use to generate and send various types of HTTP responses to the client.
+ * Typical uses: rendering templates, returning JSON for APIs, serving file downloads.
+ *
+ * - Provides factory methods (`view`, `json`, `redirect`, `file`) for common response types.
+ * - Supports custom status codes and headers via a global static registry.
+ * - Implements `exit` control (`setExitOnSend`) for compatibility with stateless environments.
+ * - Handles automated JSON encoding and appropriate `Content-Type` header setting.
  */
 class Response
 {

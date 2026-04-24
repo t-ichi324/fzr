@@ -4,7 +4,14 @@ namespace Fzr;
 use Throwable;
 
 /**
- * HTTP例外
+ * HTTP Exception — represents various HTTP error states (404, 403, 500, etc.).
+ *
+ * Use to halt execution and return a specific HTTP status code via {@see Response}.
+ * Typical uses: "not found" pages, authorization failures, validation errors.
+ *
+ * - Includes static factory methods for common error codes (`notFound()`, `forbidden()`).
+ * - Automatically resolves human-readable error titles for common HTTP status codes.
+ * - Caught by the global error handler in {@see Engine} to render error views.
  */
 class HttpException extends \Exception {
     protected static $errorTitles = [

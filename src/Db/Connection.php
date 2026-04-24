@@ -7,8 +7,14 @@ use Fzr\Logger;
 use Fzr\Path;
 
 /**
- * DB接続管理
- * 対応ドライバ: mysql, pgsql, sqlite
+ * Database Connection Wrapper — manages PDO instances and transaction state.
+ *
+ * Use to access the underlying PDO object or handle low-level transaction logic.
+ * Typical uses: manual transaction management (savepoints), PDO-specific attribute setting.
+ *
+ * - Supports multiple drivers (MySQL, PostgreSQL, SQLite).
+ * - Implements nested transactions using `SAVEPOINT` where supported.
+ * - Provides lazy-loading for PDO connections to save resources.
  */
 class Connection
 {

@@ -20,10 +20,15 @@ interface StorageAdapter
 }
 
 /**
- * ストレージ操作Facade
- * 
- * アプリケーションからはこのクラスを経由してファイルを保存・取得する。
- * 環境変数('storage_driver')によって記録先を切り替え可能。
+ * File Storage Manager — abstraction layer for local and cloud file systems.
+ *
+ * Use to save and retrieve files (uploads, generated reports, etc.) in a driver-agnostic way.
+ * Typical uses: handling user uploads, storing private assets, cloud storage integration (GCS/S3).
+ *
+ * - Supports multiple "disks" (Local, Private, Public, GCS) configured in `app.ini`.
+ * - Provides a unified API for common file operations (put, get, delete, exists).
+ * - Automatically handles directory creation and path resolution.
+ * - Detects stateless environments (Cloud Run) to suggest or switch to GCS.
  */
 class Storage
 {

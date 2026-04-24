@@ -3,7 +3,15 @@
 namespace Fzr;
 
 /**
- * 認証管理
+ * Authentication & Role Management — secure user session handling.
+ *
+ * Use to authenticate users, manage roles, and verify permissions via Attributes.
+ * Typical uses: login/logout flows, role-based access control, "remember me" functionality.
+ *
+ * - Stores authenticated user data in the session (via {@see Session}).
+ * - Supports custom "remember me" token resolution via `resolveRemember()`.
+ * - Fires `onLogin` events for post-authentication logic (e.g., updating last login time).
+ * - Integrates with `#[Roles]` and `#[Auth]` attributes for declarative security.
  */
 class Auth extends Store
 {

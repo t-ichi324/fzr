@@ -5,7 +5,15 @@ use Fzr\Logger;
 use Fzr\Path;
 
 /**
- * マイグレーション
+ * Database Migration — handles schema versioning and automated updates.
+ *
+ * Use to keep the database schema in sync across different environments.
+ * Typical uses: creating tables, adding columns, running seed data scripts.
+ *
+ * - Tracks executed migrations in a `_migrations` table.
+ * - Supports simple SQL-based migration files.
+ * - Handles both MySQL/PostgreSQL and SQLite schema syntax differences.
+ * - Integrates with `Logger` for migration audit trails.
  */
 class Migration {
     protected Connection $connection;

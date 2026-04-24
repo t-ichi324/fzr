@@ -3,8 +3,16 @@
 namespace Fzr;
 
 /**
- * ログ出力
- * 出力先: file（デフォルト） / stderr（Cloud Logging対応）
+ * Application Logger — centralized logging with multi-channel and multi-driver support.
+ *
+ * Use to record application events, errors, database queries, and security alerts.
+ * Typical uses: error tracking, performance auditing, debugging complex flows.
+ *
+ * - Supports multiple levels (info, warning, error, debug, etc.) based on PSR-3.
+ * - Handles structured logging (JSON) for cloud environments (Cloud Run).
+ * - Provides specialized channels for Database (`db()`) and Trace (`trace()`) logs.
+ * - Automatically masks sensitive information (passwords, tokens) in logs.
+ * - Can output to local files, `stderr`, or custom storage drivers.
  */
 class Logger
 {

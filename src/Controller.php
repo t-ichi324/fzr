@@ -2,7 +2,14 @@
 namespace Fzr;
 
 /**
- * コントローラ基底クラス
+ * Base Controller — provides common utilities for application controllers.
+ *
+ * Use as the parent class for all web and API controllers.
+ * Typical uses: handling HTTP requests, interacting with models, returning responses.
+ *
+ * - Provides lifecycle hooks (`__before`, `__after`, `__finally`) for cross-cutting concerns.
+ * - Managed by {@see Engine} for instantiation and method invocation.
+ * - Supports declarative routing and access control via Attributes.
  */
 abstract class Controller {
     /** デフォルトアクション */

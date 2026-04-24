@@ -2,7 +2,13 @@
 namespace Fzr;
 
 /**
- * メッセージ管理（セッションフラッシュ）
+ * User Message Helper — manages status messages (Success/Error/Warning) via Session Flash.
+ *
+ * Use to pass feedback messages from controllers to views across redirects.
+ * Typical uses: "Record saved successfully" alerts, "Login failed" notifications.
+ *
+ * - Stores messages in session flash data (auto-cleared after being read).
+ * - Provides semantic shortcuts (`success()`, `error()`, `warning()`, `info()`).
  */
 class Message {
     const SUCCESS = 'success';

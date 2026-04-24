@@ -1,6 +1,14 @@
 <?php
 /**
- * HTTP関連 Attributes
+ * HTTP Attributes — declarative markers for request handling and security.
+ *
+ * Use to annotate controllers and methods with cross-cutting concerns.
+ *
+ * - #[Csrf]: Enforces CSRF token validation on the target.
+ * - #[Auth]: Requires user authentication; supports optional redirect URL.
+ * - #[Roles]: Restricts access to specific user roles.
+ * - #[AllowCors]: Enables CORS headers for the target.
+ * - #[IpWhitelist]: Restricts access to specific IP ranges.
  */
 
 namespace Fzr\Attr\Http;

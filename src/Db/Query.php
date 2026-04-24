@@ -6,7 +6,15 @@ use Fzr\Logger;
 use Fzr\Tracer;
 
 /**
- * クエリビルダ
+ * Query Builder — fluent interface for building SQL queries programmatically.
+ *
+ * Use to build complex SELECT, INSERT, UPDATE, or DELETE queries without writing raw SQL.
+ * Typical uses: dynamic searching, filtering, bulk updates, paginated listings.
+ *
+ * - Supports method chaining for `where`, `join`, `order`, `group`, and `limit`.
+ * - Handles parameter binding automatically to prevent SQL injection.
+ * - Can return results as raw objects, arrays, or mapped {@see Entity} objects.
+ * - Supports nested `WHERE` conditions and complex subqueries.
  *
  * @template T of object
  */

@@ -5,7 +5,15 @@ namespace Fzr;
 use ReflectionMethod, ReflectionClass, Throwable;
 
 /**
- * フレームワークエンジン
+ * Core Dispatcher — handles the request-response lifecycle and routing.
+ *
+ * Use to initialize the framework and dispatch incoming HTTP requests to controllers.
+ * Typical uses: booting the app, registering custom routes, handling global exceptions.
+ *
+ * - Implements convention-based routing (IndexController::index, etc.).
+ * - Resolves and executes Attributes (#[Auth], #[Roles], etc.) with inheritance.
+ * - Manages controller instantiation and method invocation with parameter resolution.
+ * - Provides global error/exception handling hooks.
  */
 class Engine
 {

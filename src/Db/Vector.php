@@ -4,17 +4,15 @@ namespace Fzr\Db;
 use Fzr\Logger;
 
 /**
- * PostgreSQL pgvector を利用したベクトル検索 (RAG対応)
+ * Vector Database Support — experimental support for vector similarity search using pgvector.
  *
- * 前提: PostgreSQL に pgvector エクステンションがインストール済み
- *   CREATE EXTENSION IF NOT EXISTS vector;
+ * Use to perform nearest-neighbor searches on embeddings (e.g., for AI/RAG applications).
+ * Typical uses: semantic search, recommendation engines, clustering, RAG context retrieval.
  *
- * 使用例:
- *   $vec = new Vector(Db::connection('rag'));
- *   $vec->ensureExtension();
- *   $vec->createTable('documents', 1536, ['title TEXT', 'content TEXT', 'metadata JSONB']);
- *   $vec->insert('documents', $embedding, ['title' => '...', 'content' => '...']);
- *   $results = $vec->search('documents', $queryEmbedding, 10);
+ * - Specifically designed for PostgreSQL with the `pgvector` extension.
+ * - Provides specialized query logic for vector distance functions: Cosine (<=>), L2 (<->), and Inner Product (<#>).
+ * - Supports automated table creation with vector columns and appropriate indexes (IVFFlat, HNSW).
+ * - Includes a high-level `getContext()` method for combined retrieval in RAG pipelines.
  */
 class Vector {
     protected Connection $connection;

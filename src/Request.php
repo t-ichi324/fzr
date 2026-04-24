@@ -3,7 +3,15 @@
 namespace Fzr;
 
 /**
- * リクエスト処理
+ * HTTP Request Abstraction — provides unified access to request data.
+ *
+ * Use to retrieve input parameters, headers, client IP, and file uploads.
+ * Typical uses: validating user input, checking request methods, handling file uploads.
+ *
+ * - Merges GET, POST, and JSON payloads into a single searchable input bag.
+ * - Resolves client IP address with support for trusted proxies and Cloudflare.
+ * - Handles file uploads with simplified access via `file()`.
+ * - Provides helper methods for common HTTP checks (isPost, isAjax, isJsonRequest).
  */
 class Request
 {

@@ -3,8 +3,15 @@
 namespace Fzr;
 
 /**
- * 環境設定管理
- * INIファイル + 環境変数フォールバック対応
+ * Environment & Configuration Manager — unified access to INI files and environment variables.
+ *
+ * Use to retrieve application settings that change between environments (local, dev, production).
+ * Typical uses: database credentials, API keys, feature flags, version strings.
+ *
+ * - Merges `app.ini`, `.env` files, and OS environment variables.
+ * - Environment variables (OS/`.env`) take precedence over INI values.
+ * - Access via `Env::get('key')`, `Env::getBool('key')`, etc.
+ * - Supports INI inclusion via `INCLUDE_INI` key for layered configs.
  */
 class Env
 {

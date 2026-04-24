@@ -3,7 +3,15 @@
 namespace Fzr;
 
 /**
- * テンプレートレンダリング
+ * View Renderer — handles the compilation and rendering of PHP templates.
+ *
+ * Use to generate HTML output from view files.
+ * Typical uses: rendering page layouts, partials, and dynamic content.
+ *
+ * - Supports template inheritance and layout wrapping via `Response`.
+ * - Handles data extraction into the local scope of the view file.
+ * - Can be extended with custom render engines (e.g., Twig, Blade) via `setRenderer()`.
+ * - Provides global data storage for cross-view variables.
  */
 class Render
 {

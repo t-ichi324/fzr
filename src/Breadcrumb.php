@@ -2,7 +2,14 @@
 namespace Fzr;
 
 /**
- * パンくずリスト管理
+ * Breadcrumb Helper — manages navigational breadcrumb trails.
+ *
+ * Use to build and render breadcrumb links for better UI navigation.
+ * Typical uses: site-wide navigation bars, deep-linking indicators.
+ *
+ * - Provides a static interface to accumulate navigation steps.
+ * - Supports automatic HTML rendering with customizable tags and separators.
+ * - Automatically escapes output and handles URL generation via {@see Url}.
  */
 class Breadcrumb {
     private static array $items = [];

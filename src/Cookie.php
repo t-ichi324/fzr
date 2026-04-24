@@ -3,7 +3,14 @@
 namespace Fzr;
 
 /**
- * Cookie管理
+ * Cookie Manager — simplified interface for reading and writing HTTP cookies.
+ *
+ * Use to persist small amounts of data on the client's browser.
+ * Typical uses: user preferences, guest tracking, remember-me flags.
+ *
+ * - Provides a clean API for `setcookie()` and `$_COOKIE`.
+ * - Handles default paths, domains, and security flags (HttpOnly, Secure, SameSite) from `Env`.
+ * - Automatically detects HTTPS for the `Secure` flag.
  */
 class Cookie
 {

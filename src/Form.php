@@ -3,7 +3,15 @@
 namespace Fzr;
 
 /**
- * フォームデータの管理・検証クラス
+ * Form Management — entry point for creating and processing web forms.
+ *
+ * Use to handle user input validation and form rendering in a unified way.
+ * Typical uses: processing contact forms, handling user registration, data entry interfaces.
+ *
+ * - Acts as a factory and container for {@see FormValidator} and {@see FormRender}.
+ * - Simplifies the "bind-validate-render" workflow.
+ * - Supports mass-assignment from request data via `from()`.
+ * - Extends {@see Bag} to hold validated or raw input data.
  */
 class Form extends Bag
 {

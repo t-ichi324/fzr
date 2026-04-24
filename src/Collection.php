@@ -3,6 +3,16 @@
 namespace Fzr;
 
 /**
+ * Collection Wrapper — provides a fluent, object-oriented interface for arrays.
+ *
+ * Use to manipulate lists of data with functional methods like map, filter, and pluck.
+ * Typical uses: processing DB results, filtering lists of objects, aggregating data.
+ *
+ * - Implements `ArrayAccess`, `IteratorAggregate`, and `Countable` for native array-like feel.
+ * - Provides chainable methods for common transformations.
+ * - Supports Generics for type safety with static analyzers.
+ * - Used as the base for {@see \Fzr\Db\Result}.
+ *
  * @template TKey of array-key
  * @template T
  * @implements \IteratorAggregate<TKey, T>

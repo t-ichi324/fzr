@@ -3,8 +3,15 @@
 namespace Fzr;
 
 /**
- * ファイルベースのキャッシュクラス（ドライバ差し替え対応）
- * デフォルト: ファイルキャッシュ（json_encode使用）
+ * Cache Management — unified interface for memory, file, and Redis storage.
+ *
+ * Use to store expensive calculation results or frequently accessed data to improve performance.
+ * Typical uses: caching DB query results, API responses, or compiled configuration data.
+ *
+ * - Implements a two-layer cache: Local Memory (per request) and Persistent (File/Redis).
+ * - Automatically switches to Redis in stateless environments if available.
+ * - Supports custom cache drivers via `setDriver()`.
+ * - Includes a closure-based `get()` method that handles "get or set" logic atomically.
  */
 class Cache
 {

@@ -3,7 +3,16 @@
 namespace Fzr;
 
 /**
- * アプリケーション実行状態
+ * Application Execution Context — request lifecycle tracking and environment state.
+ *
+ * Use to access metadata about the current execution, such as request ID, execution time,
+ * and whether the app is running in a stateless (Cloud/Container) environment.
+ * Typical uses: logging correlation, performance profiling, feature branching by environment.
+ *
+ * - Generates and holds a unique `requestId` per request.
+ * - Tracks `startTime` for performance measurement (see `elapsed()`).
+ * - Detects stateless environments (Cloud Run, Lambda) via `isStateless()`.
+ * - Holds Redis connection config for cloud-native session/cache drivers.
  */
 class Context
 {

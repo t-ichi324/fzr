@@ -2,7 +2,14 @@
 namespace Fzr;
 
 /**
- * ルーティングヘルパー
+ * Router Registry — allows for explicit URL-to-Controller mapping.
+ *
+ * Use when convention-based routing (IndexController::action) is insufficient or for clean API URLs.
+ * Typical uses: vanity URLs, API versioning, mapping root URLs to specific controllers.
+ *
+ * - Acts as a static facade for registering routes in {@see Engine}.
+ * - Supports HTTP-method-specific registration (GET, POST, etc.).
+ * - Allows wildcard patterns for dynamic URL matching.
  */
 class Route
 {

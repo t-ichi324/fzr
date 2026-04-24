@@ -4,15 +4,15 @@ namespace Fzr\Db;
 use Fzr\Logger;
 
 /**
- * DB ファサード
+ * Database Facade — high-level entry point for all database operations.
  *
- * 複数接続の管理と共通 shorthand メソッドを提供する。
+ * Use to perform raw SQL queries, manage connections, and start transactions.
+ * Typical uses: one-off queries, direct record counts, transaction management.
  *
- * 使用例:
- *   Db::table('users')->where('active', 1)->page(1, 20);
- *   Db::select('SELECT * FROM users WHERE id = ?', [1]);
- *   Db::execute('DELETE FROM cache WHERE exp < NOW()');
- *   Db::transaction(fn() => [...]);
+ * - Manages multiple database connections via {@see Connection}.
+ * - Provides helper methods for common operations (fetch, execute, count).
+ * - Integrates with `Tracer` for database performance monitoring.
+ * - Supports automatic pagination logic via `page()`.
  */
 class Db
 {

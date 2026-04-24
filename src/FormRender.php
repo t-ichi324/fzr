@@ -2,7 +2,14 @@
 namespace Fzr;
 
 /**
- * フォームHTMLレンダリングロジック
+ * Form Renderer — generates HTML form elements with automatic state and error handling.
+ *
+ * Use to output HTML input fields that preserve user data and display validation errors.
+ * Typical uses: generating `<input>`, `<select>`, and `<textarea>` tags in view templates.
+ *
+ * - Automatically populates values from a source data object (via {@see Form}).
+ * - Injects CSS error classes and error messages when validation fails.
+ * - Simplifies form boilerplate by handling attributes, IDs, and labels.
  */
 class FormRender
 {
