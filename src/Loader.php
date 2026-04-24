@@ -13,6 +13,7 @@ if (!defined('FZR_BUNDLED')) {
     require_once __DIR__ . '/Request.php';
     require_once __DIR__ . '/Response.php';
     require_once __DIR__ . '/Render.php';
+    require_once __DIR__ . '/Bag.php';
     require_once __DIR__ . '/Form.php';
     require_once __DIR__ . '/Controller.php';
     require_once __DIR__ . '/Attr/Http.php';

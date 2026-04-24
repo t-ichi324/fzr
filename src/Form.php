@@ -53,7 +53,7 @@ class Form extends Bag
     /** ModelからFormを生成する（fromのエイリアス） */
     public static function fromModel(Model $model, array $ignore = []): self
     {
-        return self::from($model, $ignore);
+        return static::from($model, $ignore);
     }
 
     public function __construct(null|Model|array $source = null)
