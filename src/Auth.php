@@ -1,0 +1,227 @@
+<?php
+
+namespace Fzr;
+
+/**
+ * 認証管理
+ */
+class Auth extends Store
+{
+    private static ?array $roles = null;
+
+    // Remember Me 用の復元コールバックを保持
+    private static $rememberResolver = null;
+    // イベントフック
+    private static $onLogin = null;
+
+    /** 自動ログインの解決ロジックを登録する */
+    public static function resolveRemember(callable $resolver): void
+    {
+        self::$rememberResolver = $resolver;
+    }
+
+    /** ログイン時イベントを登録する */
+    public static function onLogin(callable $callback): void
+    {
+        self::$onLogin = $callback;
+    }
+
+    /** ログイン */
+    public static function login(object $user, array $roles = [], bool $regenerate = true, bool $remember = false): void
+    {
+        $key = defined('AUTH_SESSION_KEY') ? AUTH_SESSION_KEY : 'auth_key';
+        self::replace($user);
+        self::$roles = $roles;
+        $data = [
+            'user' => $user,
+            'roles' => $roles,
+        ];
+        Session::set($key, $data);
+        if ($regenerate) Session::regenerate();
+
+        $token = null;
+        if ($remember) {
+            // トークンを生成してCookieに焼き、ユーザーオブジェクトにも持たせる等の処理
+            $token = Security::randomToken(64);
+            Cookie::set('remember_token', $token, 60 * 60 * 24 * 30); // 30日
+            // ※ トークンをDBに保存する処理は $onLogin フック側に任せる
+        }
+
+        if (self::$onLogin) {
+            call_user_func(self::$onLogin, $user, $token);
+        }
+    }
+
+
+    /** ログアウト */
+    public static function logout(): void
+    {
+        $key = defined('AUTH_SESSION_KEY') ? AUTH_SESSION_KEY : 'auth_key';
+        self::clear();
+        self::$roles = null;
+        Session::remove($key);
+        if (defined('REMEMBER_TOKEN')) Cookie::remove(REMEMBER_TOKEN);
+        Session::regenerate();
+    }
+
+    /** 認証状態チェック */
+    public static function check(): bool
+    {
+        if (!self::isEmpty()) return true;
+        $key = defined('AUTH_SESSION_KEY') ? AUTH_SESSION_KEY : 'auth_key';
+        $auth = Session::get($key);
+        if (is_array($auth) && isset($auth['user'])) {
+            self::fill($auth['user']);
+            self::$roles = $auth['roles'] ?? [];
+            return true;
+        }
+
+        // セッション切れ ＆ Remember Cookie がある場合の自動復元
+        if (self::$rememberResolver && Cookie::has('remember_token')) {
+            $token = Cookie::get('remember_token');
+            $restoredUser = call_user_func(self::$rememberResolver, $token);
+
+            if ($restoredUser) {
+                // 復元成功（ロールは別途解決するか、ユーザーオブジェクトから取る前提）
+                self::login($restoredUser, $restoredUser->roles ?? [], false);
+                return true;
+            } else {
+                // 不正なトークンなら消す
+                Cookie::remove('remember_token');
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * 現在ログインしているユーザーオブジェクトを取得します。
+     * 
+     * @template T
+     * @return T|null
+     */
+    public static function userObject(): ?object
+    {
+        self::check();
+        $data = self::data();
+        return is_object($data) ? $data : (is_array($data) ? (object)$data : null);
+    }
+
+
+    /** userObject() のエイリアス */
+    public static function user(): ?object
+    {
+        return self::userObject();
+    }
+
+
+    /** ゲスト確認 */
+    public static function isGuest(): bool
+    {
+        return !self::check();
+    }
+
+    /**
+     * 現在ログインしているユーザーのIDを取得します。
+     * @return int ユーザーID
+     */
+    public static function getId(): int
+    {
+        if (!self::check()) return 0;
+        return self::getInt(Env::get("auth.user_id_name", "id"), 0);
+    }
+    public static function id(): int
+    {
+        return self::getId();
+    }
+    public static function userid(): int
+    {
+        return self::getId();
+    }
+
+    public static function getUsername(): string
+    {
+        if (!self::check()) return "";
+        return self::getString(Env::get("auth.user_name_name", "name"), "");
+    }
+    public static function username(): string
+    {
+        return self::getUsername();
+    }
+
+    /**
+     * 現在ログインしているユーザーのメールアドレスを取得します。
+     * @return string|null メールアドレス
+     */
+    public static function getEmail(): string|null
+    {
+        if (!self::check()) return null;
+        return self::getString(Env::get("auth.user_email_name", "email"), null);
+    }
+    public static function mail(): string|null
+    {
+        return self::getEmail();
+    }
+
+    public static function getRoles(): array
+    {
+        if (!self::check()) return [];
+
+        $role_data = self::get(Env::get("auth.user_roles_name", "roles"), "");
+        if (is_array($role_data)) return $role_data; // すでに配列ならそのまま返す
+
+        $role_text = (string)$role_data;
+        $role_format = Env::get("auth.user_roles_format", "csv");
+        $roles = [];
+
+        if (empty($role_format)) {
+            $roles = [$role_text];
+        } else if ($role_format === "csv") {
+            $roles = array_map('trim', explode(',', $role_text));
+        } elseif ($role_format === "json") {
+            $roles = json_decode($role_text, true) ?: [];
+        } elseif (strlen($role_format) === 1) {
+            $roles = array_map('trim', explode($role_format, $role_text));
+        }
+
+        if (!isset(self::$roles)) {
+            self::$roles = $roles;
+        }
+        return $roles;
+    }
+    public static function roles(): array
+    {
+        return self::getRoles();
+    }
+
+    /** ロール保持確認 */
+    public static function hasRole(string|array $roles): bool
+    {
+        $userRoles = self::roles();
+        if (empty($userRoles)) return false;
+        $required = is_array($roles) ? $roles : [$roles];
+        foreach ($required as $r) {
+            if (in_array($r, $userRoles, true)) return true;
+        }
+        return false;
+    }
+
+    /** hasRole() の短いエイリアス */
+    public static function is(string|array $role): bool
+    {
+        return self::hasRole($role);
+    }
+
+    /** 管理者権限の簡易確認 */
+    public static function isAdmin(): bool
+    {
+        return self::is('admin');
+    }
+
+    /** ユーザーに紐づくトークンを取得 */
+    public static function token(): ?string
+    {
+        if (!self::check()) return null;
+        return self::getString(Env::get("auth.user_token_name", "token"), null);
+    }
+}

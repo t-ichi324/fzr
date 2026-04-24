@@ -1,0 +1,17 @@
+{
+    "name": "fzr/fw",
+    "description": "Fzr Framework Core",
+    "type": "library",
+    "require": {
+        "php": ">=8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Fzr\\": "src/"
+        },
+        "files": [
+            "inc/helpers.php",
+            "inc/aliases.php"
+        ]
+    }
+}
