@@ -82,8 +82,6 @@ GET  /login/login→ controller=login, action=login  → LoginController::login(
 | `src/Bag.php` | `Bag` | 非構造化モデル基底（配列ベース） |
 | `src/Store.php` | `Store` | 静的モデル基底（レジストリベース） |
 | `src/Controller.php` | `Controller` | コントローラ基底（`__before`, `__after`, `__finally`） |
-| `Fzr\Controller` | コントローラ基底 |
-| `Fzr\Route` | ルーティング |
 | `src/Command.php` | `Command` | CLI コマンド基底（`handle(): int`, 出力・引数ヘルパー） |
 | `src/Auth.php` | `Auth` | 認証・認可（`Store` 継承） |
 | `src/Session.php` | `Session` | セッション管理（File/Redis/Cookie対応） |
