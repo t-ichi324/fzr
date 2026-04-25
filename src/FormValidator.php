@@ -1,4 +1,5 @@
 <?php
+
 namespace Fzr;
 
 /**
@@ -42,63 +43,63 @@ class FormValidator
         return $this->type;
     }
 
-    public function required(?string $message = null): self
+    public function required(?string $message = null): static
     {
         $this->rules['required'] = ['param' => true, 'message' => $message];
         return $this;
     }
-    public function email(?string $message = null): self
+    public function email(?string $message = null): static
     {
         $this->rules['email'] = ['param' => true, 'message' => $message];
         return $this;
     }
-    public function minLength(int $len, ?string $message = null): self
+    public function minLength(int $len, ?string $message = null): static
     {
         $this->rules['minLength'] = ['param' => $len, 'message' => $message];
         return $this;
     }
-    public function maxLength(int $len, ?string $message = null): self
+    public function maxLength(int $len, ?string $message = null): static
     {
         $this->rules['maxLength'] = ['param' => $len, 'message' => $message];
         return $this;
     }
-    public function password(?string $message = null): self
+    public function password(?string $message = null): static
     {
         $this->rules['password'] = ['param' => true, 'message' => $message];
         $this->type = 'password';
         return $this;
     }
-    public function numeric(?string $message = null): self
+    public function numeric(?string $message = null): static
     {
         $this->rules['numeric'] = ['param' => true, 'message' => $message];
         return $this;
     }
-    public function integer(?string $message = null): self
+    public function integer(?string $message = null): static
     {
         $this->rules['integer'] = ['param' => true, 'message' => $message];
         return $this;
     }
-    public function url(?string $message = null): self
+    public function url(?string $message = null): static
     {
         $this->rules['url'] = ['param' => true, 'message' => $message];
         return $this;
     }
-    public function regex(string $pattern, ?string $message = null): self
+    public function regex(string $pattern, ?string $message = null): static
     {
         $this->rules['regex'] = ['param' => $pattern, 'message' => $message];
         return $this;
     }
-    public function between(float|int $min, float|int $max, ?string $message = null): self
+    public function between(float|int $min, float|int $max, ?string $message = null): static
     {
         $this->rules['between'] = ['param' => [$min, $max], 'message' => $message];
         return $this;
     }
-    public function confirmed(?string $message = null): self
+    public function confirmed(?string $message = null): static
     {
         $this->rules['confirmed'] = ['param' => true, 'message' => $message];
         return $this;
     }
-    public function date(?string $message = null): self
+    public function date(?string $message = null): static
     {
         $this->rules['date'] = ['param' => true, 'message' => $message];
         return $this;
@@ -119,10 +120,26 @@ class FormValidator
     }
 
     /** File Validation */
-    public function file(?string $message = null): self { $this->rules['file'] = ['param' => true, 'message' => $message]; return $this; }
-    public function image(?string $message = null): self { $this->rules['image'] = ['param' => true, 'message' => $message]; return $this; }
-    public function maxSize(string $size, ?string $message = null): self { $this->rules['maxSize'] = ['param' => $size, 'message' => $message]; return $this; }
-    public function mimes(array|string $exts, ?string $message = null): self { $this->rules['mimes'] = ['param' => (array)$exts, 'message' => $message]; return $this; }
+    public function file(?string $message = null): static
+    {
+        $this->rules['file'] = ['param' => true, 'message' => $message];
+        return $this;
+    }
+    public function image(?string $message = null): static
+    {
+        $this->rules['image'] = ['param' => true, 'message' => $message];
+        return $this;
+    }
+    public function maxSize(string $size, ?string $message = null): static
+    {
+        $this->rules['maxSize'] = ['param' => $size, 'message' => $message];
+        return $this;
+    }
+    public function mimes(array|string $exts, ?string $message = null): static
+    {
+        $this->rules['mimes'] = ['param' => (array)$exts, 'message' => $message];
+        return $this;
+    }
 
     public function getLastMessage(): ?string
     {

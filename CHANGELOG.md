@@ -12,6 +12,11 @@
     - `Form::validate()` 実行直前に `preSyncModel()` を行い、入力を Model プロパティに反映。これによりカスタムメソッド内で他のフィールドを容易に参照可能。
     - `FormValidator::with()` メソッドを追加。Controller 内で動的なクロージャ・バリデーションを柔軟に追加可能。
     - バリデーション実行順序を「標準ルール -> カスタムルール」に固定し、カスタムロジック実行時のデータ品質を保証。
+- **Refinement: 型一貫性と可読性の向上**:
+    - `Form::fromModel()` および `FormValidator` のチェーンメソッドの戻り型を `static` に統一。
+    - `Auth::userObject()` の不正確な `@template` を削除し、実態に即した DocBlock へ修正。
+    - `Engine.php` 内のネスト `if` ブロックを整形し、可読性を向上。
+    - `Form::addError()` 内の冗長な `null` チェック（デッドコード）を削除。
 
 ### Fixed
 - **Engine: `__finally` 戻り値オーバーライドの修正**: `inv_inner` メソッドの戻り値処理を改善し、`__finally` フックで戻り値を正常に差し替えられるように修正。

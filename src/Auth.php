@@ -116,8 +116,7 @@ class Auth extends Store
     /**
      * 現在ログインしているユーザーオブジェクトを取得します。
      * 
-     * @template T
-     * @return T|null
+     * @return object|null
      */
     public static function userObject(): ?object
     {

@@ -82,6 +82,8 @@ GET  /login/login→ controller=login, action=login  → LoginController::login(
 | `src/Bag.php` | `Bag` | 非構造化モデル基底（配列ベース） |
 | `src/Store.php` | `Store` | 静的モデル基底（レジストリベース） |
 | `src/Controller.php` | `Controller` | コントローラ基底（`__before`, `__after`, `__finally`） |
+| `Fzr\Controller` | コントローラ基底 |
+| `Fzr\Route` | ルーティング |
 | `src/Command.php` | `Command` | CLI コマンド基底（`handle(): int`, 出力・引数ヘルパー） |
 | `src/Auth.php` | `Auth` | 認証・認可（`Store` 継承） |
 | `src/Session.php` | `Session` | セッション管理（File/Redis/Cookie対応） |
@@ -227,13 +229,13 @@ Auth::resolveRemember(function(string $token): ?object {
 
 ## Form Validation + HTML Generation
 
-`Form` wires together validation rules and HTML rendering. Model field attributes are auto-applied via `Form::fromModel()`.
+`Form` wires together validation rules and HTML rendering. Model field attributes are auto-applied via `Form::from()`.
 
 ```php
 // ── Controller ──────────────────────────────────────────
 // Option A: derive rules from Model attributes automatically
 $form = Form::from($user, ignore: ['id']);    // Use 'from' for Model or generic sources
-$form = Form::fromPost();                      // Use 'fromPost' to explicitly narrow to $_POST
+$form = Form::fromRequest();                  // Use 'fromRequest' for automatic HTTP data
 $form->fill(Request::post() ?: []);           // populate with POST data
 if (!$form->validate()) {
     $form->flashError();                       // エラーをすべて Message::error() に送出
@@ -247,7 +249,7 @@ $user->setPassword($form->get('password'));  // パスワードは個別処理
 $user->save();
 
 // Option B: define rules manually
-$form = Form::fromPost();
+$form = Form::fromRequest();
 $form->rule('name',  '名前')->required()->maxLength(50);
 $form->rule('email', 'メール')->required()->email();
 $form->rule('age',   '年齢')->integer()->between(0, 150);

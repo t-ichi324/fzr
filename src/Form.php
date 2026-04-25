@@ -24,22 +24,6 @@ class Form extends Bag
     {
         return new self($_REQUEST);
     }
-    public static function fromGet(): self
-    {
-        return new self($_GET);
-    }
-    public static function fromPost(): self
-    {
-        return new self($_POST);
-    }
-    public static function fromSource(array $source): self
-    {
-        return new self($source);
-    }
-    public static function getInstance(): self
-    {
-        return new self();
-    }
 
     /** ソースからFormを生成（Modelの場合はバリデーションルールも自動構築） */
     public static function from(mixed $source, array $ignore = []): static
@@ -49,12 +33,6 @@ class Form extends Bag
             return $instance->bindModel($source, $ignore);
         }
         return $instance->bind($source);
-    }
-
-    /** ModelからFormを生成する（fromのエイリアス） */
-    public static function fromModel(Model $model, array $ignore = []): self
-    {
-        return static::from($model, $ignore);
     }
 
     public function __construct(null|Model|array $source = null)
@@ -239,13 +217,14 @@ class Form extends Bag
             }
             try {
                 $model->$key = $this->get($key);
-            } catch (\TypeError) {}
+            } catch (\TypeError) {
+            }
         }
     }
 
     public function addError(array|string $text, ?string $key = null)
     {
-        if ($text === null || $text === "") {
+        if ($text === "") {
             return;
         }
         if (is_array($text)) {

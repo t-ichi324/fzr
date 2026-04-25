@@ -471,7 +471,11 @@ class Engine
             throw $ex;
         } finally {
             try {
-                if ($this->isMethodOverridden($controller, '__finally')) if (($ret_fin = $controller->__finally($routeAction, $dispatchMethod)) !== null) $ret = $ret_fin;
+                if ($this->isMethodOverridden($controller, '__finally')) {
+                    if (($ret_fin = $controller->__finally($routeAction, $dispatchMethod)) !== null) {
+                        $ret = $ret_fin;
+                    }
+                }
             } catch (\Throwable $ex) {
                 Logger::exception("Finally-block failed in $class::$dispatchMethod()", $ex);
             }
