@@ -60,7 +60,7 @@ GET  /login/login→ controller=login, action=login  → LoginController::login(
 | ファイル | 含むクラス／型 | 備考 |
 |---------|-------------|------|
 | `src/Attr/Http.php` | `Csrf`, `Auth`, `Api`, `Roles`, `Role`, `AllowCors`, `AllowCache`, `AllowIframe`, `IsReadOnly`, `IpWhitelist` | namespace: `Fzr\Attr\Http` |
-| `src/Attr/Field.php` | `Label`, `Required`, `MaxLength`, `MinLength`, `Email`, `Numeric`, `Integer`, `Url`, `Regex`, `In`, `NotIn`, `Between`, `Confirmed`, `SameAs`, `Date` | namespace: `Fzr\Attr\Field` |
+| `src/Attr/Field.php` | `Label`, `Required`, `MaxLength`, `MinLength`, `Email`, `Numeric`, `Integer`, `Url`, `Regex`, `In`, `NotIn`, `Between`, `Confirmed`, `SameAs`, `Date`, `Custom` | namespace: `Fzr\Attr\Field` |
 
 > `Attr/Http.php` と `Attr/Field.php` は PHP Attribute の仕様上複数定義が必要なため、オートロード不可。`src/Loader.php` で事前 `require_once` 済み。
 
@@ -139,6 +139,7 @@ Fzr uses **Class Aliases** to reduce context overhead. All core classes are avai
 | `Response` | `view($tpl)`, `redirect($url)`, `json($data)`, `error($code)` |
 | `Render` | `setTitle($t)`, `setData($k,$v)`, `getData($k)` |
 | `Form` | Form validation + HTML generation — see section below |
+| `FormValidator` | `rule()`, `required()`, `email()`, ..., `with(callable, ?string)` |
 | `Session` | `get/set/remove/flash/getFlash($key)`, `regenerate()` |
 | `Cookie` | `get/set/has/remove($key)` |
 | `Db` | `table($t)`, `select($sql,$p)`, `execute($sql,$p)`, `transaction($fn)`, `migrate()`, `tables()`, `schema($t)`, `generateModels($dir, $force, $tables)` |
@@ -250,6 +251,10 @@ $form = Form::fromPost();
 $form->rule('name',  '名前')->required()->maxLength(50);
 $form->rule('email', 'メール')->required()->email();
 $form->rule('age',   '年齢')->integer()->between(0, 150);
+
+// Add dynamic rules via with()
+$form->rule('email')->with(fn($v) => !User::exists($v), 'Already exists.');
+
 if (!$form->validate()) { ... }
 
 // Pass form to view
@@ -285,6 +290,22 @@ Render::setData('form', $form);
 | `#[Between(min,max)]` | `between(min,max)` | Numeric range |
 | `#[Confirmed]` | `confirmed()` | Matches `{field}_confirmation` |
 | `#[SameAs('other')]` | — | Matches another field |
+| `#[Custom('method')]` | `with()` | Calls method on Model/DTO |
+
+**Custom Validation (Model Method Pattern)**
+`#[Custom]` を使用すると、Model 自身のメソッドでバリデーションを行えます。
+- `Form::validate()` の開始時に `preSyncModel()` が走り、全プロパティが最新の入力値で更新されます。
+- そのため、メソッド内では `$this->password` のように他のフィールドを参照できます。
+- メソッドは `true` (成功) または `string` (エラーメッセージ。`:field` 置換あり) を返すべきです。
+
+```php
+#[Custom('checkUnique')]
+public string $email;
+
+public function checkUnique($val) {
+    return User::exists($val) ? ':field は既に使用されています' : true;
+}
+```
 
 Validation error messages can be overridden in `app.ini`:
 ```ini

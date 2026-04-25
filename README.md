@@ -257,7 +257,7 @@ use Fzr\Attr\Http\{Csrf, Api, Roles, AllowCors, AllowCache, AllowIframe, IsReadO
 モデルのプロパティに付与することで、自動バリデーションやラベル表示に利用できます。
 
 ```php
-use Fzr\Attr\Field\{Label, Required, MaxLength, MinLength, Email, Numeric, Integer, Url, Regex, In, NotIn, Between, Confirmed, SameAs, Date};
+use Fzr\Attr\Field\{Label, Required, MaxLength, MinLength, Email, Numeric, Integer, Url, Regex, In, NotIn, Between, Confirmed, SameAs, Date, Custom};
 
 class User extends \Fzr\Model {
     #[Label('ユーザー名'), Required, MaxLength(50)]
@@ -271,6 +271,13 @@ class User extends \Fzr\Model {
     
     #[Label('年齢'), Integer, Between(18, 100)]
     public int $age;
+
+    #[Label('パスワード確認'), Required, Custom('checkPasswordMatch')]
+    public string $password_confirm;
+
+    public function checkPasswordMatch($value): bool|string {
+        return $value === $this->password ? true : 'パスワードが一致しません';
+    }
 }
 ```
 
@@ -290,6 +297,7 @@ class User extends \Fzr\Model {
 | `#[Between(min, max)]` | 数値の範囲 |
 | `#[Confirmed]` | `_confirmation` サフィックスのフィールドと一致するか |
 | `#[SameAs('field')]` | 指定したフィールド名と一致するか |
+| `#[Custom('method')]` | モデル内の指定メソッドでバリデーションを実行 |
 
 ## DB操作
 
