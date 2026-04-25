@@ -116,9 +116,9 @@ class Engine
             define('APP_NAME', Env::get('app.name', 'MyApp'));
             define('LOGIN_PAGE', Env::get('app.login_page', 'login'));
             define('DELIMITER', Env::get('app.delimiter', '-'));
-            define('AUTH_SESSION_KEY', Env::get('session.auth_key', 'auth_key@' . Env::get('app.key', md5(__DIR__))));
             define("REMEMBER_TOKEN", Env::get("session.remember_token", "rem"));
             define("CSRF_TOKEN_NAME", Env::get('security.csrf_name', "csrf_token"));
+            define("CSRF_HEADER_NAME", Env::get('security.csrf_header', "X-CSRF-TOKEN"));
             date_default_timezone_set(Env::get('app.timezone', 'UTC'));
             define('VIEW_TEMPLATE_BASE', Env::get("view.base_template", "@layouts/base.php"));
 

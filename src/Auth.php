@@ -21,6 +21,16 @@ class Auth extends Store
     private static $rememberResolver = null;
     // イベントフック
     private static $onLogin = null;
+    private static ?string $authKey = null;
+
+    /** 認証用セッションキーを取得する */
+    public static function sessionKey(): string
+    {
+        if (self::$authKey === null) {
+            self::$authKey = Env::get('session.auth_key', 'auth_key@' . Env::get('app.key', md5(ABSPATH)));
+        }
+        return self::$authKey;
+    }
 
     /** 自動ログインの解決ロジックを登録する */
     public static function resolveRemember(callable $resolver): void
@@ -37,7 +47,7 @@ class Auth extends Store
     /** ログイン */
     public static function login(object $user, array $roles = [], bool $regenerate = true, bool $remember = false): void
     {
-        $key = defined('AUTH_SESSION_KEY') ? AUTH_SESSION_KEY : 'auth_key';
+        $key = self::sessionKey();
         self::replace($user);
         self::$roles = $roles;
         $data = [
@@ -51,7 +61,7 @@ class Auth extends Store
         if ($remember) {
             // トークンを生成してCookieに焼き、ユーザーオブジェクトにも持たせる等の処理
             $token = Security::randomToken(64);
-            Cookie::set('remember_token', $token, 60 * 60 * 24 * 30); // 30日
+            Cookie::set(self::rememberTokenName(), $token, 60 * 60 * 24 * 30); // 30日
             // ※ トークンをDBに保存する処理は $onLogin フック側に任せる
         }
 
@@ -64,11 +74,11 @@ class Auth extends Store
     /** ログアウト */
     public static function logout(): void
     {
-        $key = defined('AUTH_SESSION_KEY') ? AUTH_SESSION_KEY : 'auth_key';
+        $key = self::sessionKey();
         self::clear();
         self::$roles = null;
         Session::remove($key);
-        if (defined('REMEMBER_TOKEN')) Cookie::remove(REMEMBER_TOKEN);
+        Cookie::remove(self::rememberTokenName());
         Session::regenerate();
     }
 
@@ -76,7 +86,7 @@ class Auth extends Store
     public static function check(): bool
     {
         if (!self::isEmpty()) return true;
-        $key = defined('AUTH_SESSION_KEY') ? AUTH_SESSION_KEY : 'auth_key';
+        $key = self::sessionKey();
         $auth = Session::get($key);
         if (is_array($auth) && isset($auth['user'])) {
             self::fill($auth['user']);
@@ -85,8 +95,9 @@ class Auth extends Store
         }
 
         // セッション切れ ＆ Remember Cookie がある場合の自動復元
-        if (self::$rememberResolver && Cookie::has('remember_token')) {
-            $token = Cookie::get('remember_token');
+        $cookieName = self::rememberTokenName();
+        if (self::$rememberResolver && Cookie::has($cookieName)) {
+            $token = Cookie::get($cookieName);
             $restoredUser = call_user_func(self::$rememberResolver, $token);
 
             if ($restoredUser) {
@@ -95,7 +106,7 @@ class Auth extends Store
                 return true;
             } else {
                 // 不正なトークンなら消す
-                Cookie::remove('remember_token');
+                Cookie::remove($cookieName);
             }
         }
 
@@ -223,7 +234,7 @@ class Auth extends Store
     /** 管理者権限の簡易確認 */
     public static function isAdmin(): bool
     {
-        return self::is('admin');
+        return self::is(Env::get('auth.admin_role', 'admin'));
     }
 
     /** ユーザーに紐づくトークンを取得 */
@@ -231,5 +242,11 @@ class Auth extends Store
     {
         if (!self::check()) return null;
         return self::getString(Env::get("auth.user_token_name", "token"), null);
+    }
+
+    /** Remember Me 用の Cookie 名を取得する */
+    private static function rememberTokenName(): string
+    {
+        return defined('REMEMBER_TOKEN') ? REMEMBER_TOKEN : 'rem';
     }
 }

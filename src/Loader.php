@@ -2,8 +2,6 @@
 
 namespace Fzr;
 
-use ReflectionMethod, ReflectionClass, Throwable;
-
 // コアクラスを事前に読み込み（オートロードのオーバーヘッド回避）
 if (!defined('FZR_BUNDLED')) {
     require_once __DIR__ . '/Config.php';

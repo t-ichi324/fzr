@@ -37,7 +37,7 @@ class Security
     {
         $key = defined('CSRF_TOKEN_NAME') ? CSRF_TOKEN_NAME : 'csrf_token';
         $token = Request::input($key)
-            ?: Request::server('HTTP_X_CSRF_TOKEN');
+            ?: Request::header(defined('CSRF_HEADER_NAME') ? CSRF_HEADER_NAME : 'X-CSRF-TOKEN');
 
         $session_token = Session::get($key);
 

@@ -1,4 +1,9 @@
 <?php
+
+namespace Fzr\Attr\Http;
+
+use Attribute;
+
 /**
  * HTTP Attributes — declarative markers for request handling and security.
  *
@@ -11,32 +16,38 @@
  * - #[IpWhitelist]: Restricts access to specific IP ranges.
  */
 
-namespace Fzr\Attr\Http;
-
-use Attribute;
-
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
 class Csrf {}
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
-class Auth {
+class Auth
+{
     public ?string $redirect;
-    public function __construct(?string $redirect = null) { $this->redirect = $redirect; }
+    public function __construct(?string $redirect = null)
+    {
+        $this->redirect = $redirect;
+    }
 }
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
-class Guest {
+class Guest
+{
     public ?string $redirect;
-    public function __construct(?string $redirect = null) { $this->redirect = $redirect; }
+    public function __construct(?string $redirect = null)
+    {
+        $this->redirect = $redirect;
+    }
 }
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
 class Api {}
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
-class Roles {
+class Roles
+{
     public array $roles;
-    public function __construct(string|array ...$roles) {
+    public function __construct(string|array ...$roles)
+    {
         $merged = [];
         foreach ($roles as $r) {
             if (is_array($r)) $merged = array_merge($merged, $r);
@@ -47,7 +58,8 @@ class Roles {
 }
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
-class AllowCors {
+class AllowCors
+{
     public array $origins;
     public string $methods;
     public string $headers;
@@ -67,9 +79,13 @@ class AllowCors {
 }
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
-class AllowCache {
+class AllowCache
+{
     public int $maxAge;
-    public function __construct(int $maxAge = 3600) { $this->maxAge = $maxAge; }
+    public function __construct(int $maxAge = 3600)
+    {
+        $this->maxAge = $maxAge;
+    }
 }
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
@@ -79,9 +95,11 @@ class AllowIframe {}
 class IsReadOnly {}
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
-class IpWhitelist {
+class IpWhitelist
+{
     public array $ips;
-    public function __construct(string|array ...$ips) {
+    public function __construct(string|array ...$ips)
+    {
         $merged = [];
         foreach ($ips as $r) {
             if (is_array($r)) $merged = array_merge($merged, $r);
