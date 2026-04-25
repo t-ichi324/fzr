@@ -18,6 +18,7 @@ class Form extends Bag
     protected array $validators = [];
     protected array $errors = [];
     protected ?string $csrfToken = null;
+    protected ?Model $boundModel = null;
 
     public static function fromRequest(): self
     {
@@ -82,6 +83,7 @@ class Form extends Bag
 
     public function applyAttributes(Model $model, array $ignore = []): self
     {
+        $this->boundModel = $model;
         $ref = new \ReflectionClass($model);
         foreach ($ref->getProperties(\ReflectionProperty::IS_PUBLIC) as $prop) {
             $name = $prop->getName();
@@ -122,6 +124,9 @@ class Form extends Bag
                     $rule->confirmed();
                 } elseif ($instance instanceof \Fzr\Attr\Field\Date) {
                     $rule->date();
+                } elseif ($instance instanceof \Fzr\Attr\Field\Custom) {
+                    $method = $instance->method;
+                    $rule->with([$model, $method]);
                 }
             }
             if (!$rule->getType() && str_contains(strtolower($name), 'password')) {
@@ -209,6 +214,9 @@ class Form extends Bag
     {
         $ok = true;
         $this->errors = [];
+        if ($this->boundModel !== null) {
+            $this->preSyncModel($this->boundModel);
+        }
         foreach ($this->validators as $key => $validator) {
             if (! $validator->validate($this->get($key))) {
                 $ok = false;
@@ -216,6 +224,23 @@ class Form extends Bag
             }
         }
         return $ok;
+    }
+
+    private function preSyncModel(Model $model): void
+    {
+        $ref = new \ReflectionClass($model);
+        foreach ($this->keyList() as $key) {
+            if (!$ref->hasProperty($key)) {
+                continue;
+            }
+            $prop = $ref->getProperty($key);
+            if (!$prop->isPublic()) {
+                continue;
+            }
+            try {
+                $model->$key = $this->get($key);
+            } catch (\TypeError) {}
+        }
     }
 
     public function addError(array|string $text, ?string $key = null)

@@ -186,3 +186,9 @@ class Date
         return ['date' => true];
     }
 }
+
+#[Attribute(Attribute::TARGET_PROPERTY | Attribute::IS_REPEATABLE)]
+class Custom
+{
+    public function __construct(public readonly string $method) {}
+}

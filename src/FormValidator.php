@@ -17,6 +17,7 @@ class FormValidator
     protected string $label;
     protected Form $form;
     protected array $rules = [];
+    protected array $customs = [];
     protected ?string $type = null;
     protected ?string $lastMessage = null;
 
@@ -103,6 +104,20 @@ class FormValidator
         return $this;
     }
 
+    /**
+     * カスタムバリデーターを追加する。
+     *
+     * $fn は (mixed $value): bool|string を返す callable。
+     * - true を返す: バリデーション成功
+     * - string を返す: エラーメッセージ（:field 置換あり）
+     * - false を返す: $message をエラーメッセージとして使用
+     */
+    public function with(callable $fn, ?string $message = null): static
+    {
+        $this->customs[] = ['fn' => $fn, 'message' => $message];
+        return $this;
+    }
+
     /** File Validation */
     public function file(?string $message = null): self { $this->rules['file'] = ['param' => true, 'message' => $message]; return $this; }
     public function image(?string $message = null): self { $this->rules['image'] = ['param' => true, 'message' => $message]; return $this; }
@@ -137,6 +152,7 @@ class FormValidator
                 'image'      => ':field must be an image.',
                 'maxSize'    => ':field size must be at most :size.',
                 'mimes'      => ':field must be one of: :exts.',
+                'custom'     => ':field is invalid.',
             ];
             $template = Env::get($envKey, $defaultMessages[$rule] ?? $rule);
         }
@@ -173,6 +189,19 @@ class FormValidator
                 default      => null,
             };
             if ($error) {
+                $this->lastMessage = $error;
+                return false;
+            }
+        }
+        foreach ($this->customs as $custom) {
+            if ($skip) {
+                continue;
+            }
+            $result = ($custom['fn'])($value);
+            if ($result !== true) {
+                $error = is_string($result)
+                    ? str_replace(':field', $this->label, $result)
+                    : ($custom['message'] ?? $this->msg('custom', [], null));
                 $this->lastMessage = $error;
                 return false;
             }
