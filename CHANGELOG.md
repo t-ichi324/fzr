@@ -19,6 +19,10 @@
     - `Form::addError()` 内の冗長な `null` チェック（デッドコード）を削除。
 
 ### Fixed
+- **Db\Query: マルチDB対応の強化**:
+  - `quoteIdentifier()` を強化し、`SUM(col)`・`FIELD(...)` 等の関数式および `*` をクォートせずにそのまま返すように修正。ドット分割前に `(` / スペースを検出することで `SUM(t.col)` 等の複合式の誤爆を防止。
+  - `buildSelect`, `count`, `page`, `insert`, `insertMany`, `upsert`, `update`, `delete` の全箇所で `{$this->table}` を `quoteIdentifier()` 経由に変更。`order`, `group` 等の SQL 予約語のテーブル名を MySQL / PostgreSQL / SQLite いずれでも安全に扱えるように修正。
+  - `rightJoin()` において SQLite ドライバ使用時に `Logger::warning` を発行。SQLite 3.39.0 未満では RIGHT JOIN が非サポートのため早期に把握できるよう改善。
 - **Engine: `__finally` 戻り値オーバーライドの修正**: `inv_inner` メソッドの戻り値処理を改善し、`__finally` フックで戻り値を正常に差し替えられるように修正。
 - **Cache: ディレクトリ権限の修正**: キャッシュディレクトリ作成時のパーミッションを `0766` から、実行ビットを含む `0775` に変更し、アクセスエラーを防止。
 - **Security: CSRF フィールドのエスケープ不足を修正**: `Security::csrfField()` においてトークンとキーが HTML エスケープされていなかった不整合を修正。

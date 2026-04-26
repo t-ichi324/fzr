@@ -291,6 +291,10 @@ class Query
     /** RIGHT JOIN */
     public function rightJoin(string $table, string $on): self
     {
+        // SQLite は 3.39.0 未満では RIGHT JOIN 非対応
+        if ($this->connection->getDriver() === 'sqlite') {
+            Logger::warning('RIGHT JOIN is not supported in SQLite < 3.39.0. Consider rewriting as a LEFT JOIN with swapped tables.');
+        }
         return $this->join($table, $on, 'RIGHT');
     }
 
@@ -341,7 +345,7 @@ class Query
         $this->limit  = $perPage;
         $this->offset = ($page - 1) * $perPage;
 
-        $countSql = "SELECT COUNT(*) FROM {$this->table}" . $this->buildJoins() . $this->buildWhere();
+        $countSql = 'SELECT COUNT(*) FROM ' . $this->quoteIdentifier($this->table) . $this->buildJoins() . $this->buildWhere();
         $stmt = $this->connection->getPdo()->prepare($countSql);
         $stmt->execute($this->params);
         $total = (int)$stmt->fetchColumn();
@@ -399,7 +403,7 @@ class Query
     /** 件数取得 */
     public function count(): int
     {
-        $sql  = "SELECT COUNT(*) FROM {$this->table}" . $this->buildJoins() . $this->buildWhere();
+        $sql  = 'SELECT COUNT(*) FROM ' . $this->quoteIdentifier($this->table) . $this->buildJoins() . $this->buildWhere();
         $stmt = $this->connection->getPdo()->prepare($sql);
         $start = microtime(true);
         $stmt->execute($this->params);
@@ -529,7 +533,7 @@ class Query
             $placeholders[] = $ph;
             $params[$ph]    = $v;
         }
-        $sql  = "INSERT INTO {$this->table} ({$columns}) VALUES (" . implode(', ', $placeholders) . ")";
+        $sql  = 'INSERT INTO ' . $this->quoteIdentifier($this->table) . " ({$columns}) VALUES (" . implode(', ', $placeholders) . ')';
         $pdo  = $this->connection->getPdo();
         $stmt = $pdo->prepare($sql);
         $start = microtime(true);
@@ -565,7 +569,7 @@ class Query
             $allPlaceholders[] = '(' . implode(', ', $rowPh) . ')';
         }
 
-        $sql  = "INSERT INTO {$this->table} (" . implode(', ', $quotedColumns) . ") VALUES " . implode(', ', $allPlaceholders);
+        $sql  = 'INSERT INTO ' . $this->quoteIdentifier($this->table) . ' (' . implode(', ', $quotedColumns) . ') VALUES ' . implode(', ', $allPlaceholders);
         $stmt = $this->connection->getPdo()->prepare($sql);
         $start = microtime(true);
         $stmt->execute($params);
@@ -606,9 +610,9 @@ class Query
                     $updateSets[] = "{$q} = VALUES({$q})";
                 }
             }
-            $sql = "INSERT INTO {$this->table} (" . implode(', ', $quotedColumns) . ")"
-                . " VALUES (" . implode(', ', $placeholders) . ")"
-                . " ON DUPLICATE KEY UPDATE " . implode(', ', $updateSets);
+            $sql = 'INSERT INTO ' . $this->quoteIdentifier($this->table) . ' (' . implode(', ', $quotedColumns) . ')'
+                . ' VALUES (' . implode(', ', $placeholders) . ')'
+                . ' ON DUPLICATE KEY UPDATE ' . implode(', ', $updateSets);
         } else {
             // SQLite / PostgreSQL
             $quotedKeys  = array_map(fn($k) => $this->quoteIdentifier($k), $uniqueKeys);
@@ -619,10 +623,10 @@ class Query
                     $updateSets[] = "{$q} = excluded.{$q}";
                 }
             }
-            $sql = "INSERT INTO {$this->table} (" . implode(', ', $quotedColumns) . ")"
-                . " VALUES (" . implode(', ', $placeholders) . ")"
-                . " ON CONFLICT (" . implode(', ', $quotedKeys) . ")"
-                . " DO UPDATE SET " . implode(', ', $updateSets);
+            $sql = 'INSERT INTO ' . $this->quoteIdentifier($this->table) . ' (' . implode(', ', $quotedColumns) . ')'
+                . ' VALUES (' . implode(', ', $placeholders) . ')'
+                . ' ON CONFLICT (' . implode(', ', $quotedKeys) . ')'
+                . ' DO UPDATE SET ' . implode(', ', $updateSets);
         }
 
         $stmt = $this->connection->getPdo()->prepare($sql);
@@ -649,7 +653,7 @@ class Query
             $params[$ph] = $v;
         }
         $params = array_merge($params, $this->params);
-        $sql    = "UPDATE {$this->table} SET " . implode(', ', $sets) . $this->buildWhere();
+        $sql    = 'UPDATE ' . $this->quoteIdentifier($this->table) . ' SET ' . implode(', ', $sets) . $this->buildWhere();
         $stmt   = $this->connection->getPdo()->prepare($sql);
         $start = microtime(true);
         $stmt->execute($params);
@@ -666,7 +670,7 @@ class Query
      */
     public function delete(): int
     {
-        $sql  = "DELETE FROM {$this->table}" . $this->buildWhere();
+        $sql  = 'DELETE FROM ' . $this->quoteIdentifier($this->table) . $this->buildWhere();
         $stmt = $this->connection->getPdo()->prepare($sql);
         $start = microtime(true);
         $stmt->execute($this->params);
@@ -704,7 +708,7 @@ class Query
     protected function buildSelect(): string
     {
         $dist = $this->distinct ? 'DISTINCT ' : '';
-        $sql  = "SELECT {$dist}" . implode(', ', $this->select) . " FROM {$this->table}";
+        $sql  = "SELECT {$dist}" . implode(', ', $this->select) . ' FROM ' . $this->quoteIdentifier($this->table);
         $sql .= $this->buildJoins();
         $sql .= $this->buildWhere();
         if ($this->groupBy) $sql .= " GROUP BY {$this->groupBy}";
@@ -758,8 +762,20 @@ class Query
     {
         $driver = $this->connection->getDriver();
         $q      = $driver === 'mysql' ? '`' : '"';
+
+        // 関数式（括弧含む）・スペース含む複合式はそのまま返す（クォート不可な生SQL式）
+        if (str_contains($identifier, '(') || str_contains($identifier, ' ')) {
+            return $identifier;
+        }
+
         return implode('.', array_map(
-            fn($part) => $q . str_replace($q, $q . $q, $part) . $q,
+            function (string $part) use ($q): string {
+                // * はクォートしない
+                if ($part === '*') return $part;
+                // すでに同じ引用符でクォート済みならそのまま返す
+                if (strlen($part) >= 2 && $part[0] === $q && $part[-1] === $q) return $part;
+                return $q . str_replace($q, $q . $q, $part) . $q;
+            },
             explode('.', $identifier)
         ));
     }
