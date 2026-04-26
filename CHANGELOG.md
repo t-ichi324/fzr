@@ -18,6 +18,13 @@
     - `Engine.php` 内のネスト `if` ブロックを整形し、可読性を向上。
     - `Form::addError()` 内の冗長な `null` チェック（デッドコード）を削除。
 
+### Added
+- **Jwt: JWT ユーティリティをコアに移植** (`src/Jwt.php`, `namespace Fzr`):
+  - `fzr/kit` の `Fzr\Auth\Jwt` を `fzr/fw` コアへ吸収し、`Fzr\Jwt` として独立ファイル化。
+  - 配置理由: (1) CSRF・IP制限を担う `Security.php` との責務分離、(2) セッションベースの `Auth.php` とステートレス JWT の分離、(3) `Fzr\Jwt` という短い名前空間でコアクラスと同列に並ぶ一貫性、(4) 他クラスへの依存ゼロでバンドル環境でも安全。
+  - kit 側の `php-libs/src/Auth/Jwt.php` を削除し二重定義を解消。
+  - API: `Jwt::encode()` / `Jwt::decode()` / `Jwt::verify()` / `Jwt::fromBearer()` — 変更なし。
+
 ### Fixed
 - **Db\Query: マルチDB対応の強化**:
   - `quoteIdentifier()` を強化し、`SUM(col)`・`FIELD(...)` 等の関数式および `*` をクォートせずにそのまま返すように修正。ドット分割前に `(` / スペースを検出することで `SUM(t.col)` 等の複合式の誤爆を防止。
